@@ -1,0 +1,86 @@
+use AdventureWorks2012
+
+go
+
+select Count( distinct jobtitle)
+from HumanResources.Employee
+
+
+select *
+from Production.product
+where name not like '%metal%'
+
+
+select e.JobTitle,e.HireDate,p.FirstName,p.LastName ,DATEDIFF(year,e.HireDate,getdate())"Years of working",DATEPART(month,e.HireDate)"month of working"
+from HumanResources.Employee e
+ join Person.Person p on p.BusinessEntityID=e.BusinessEntityID
+ where e.HireDate> '2002-01-01'
+ order by e.HireDate
+
+
+
+ select pp.Name"Product Name" ,  pcc.Name"Culture Name" 
+ from Production.ProductModel pm
+ join  Production.Product pp on pp.ProductModelID=pm.ProductModelID
+ join Production.ProductModelProductDescriptionCulture pc
+ on pc.ProductModelID=pp.ProductModelID
+ join Production.Culture pcc
+ on pc.CultureID =pcc.CultureID
+
+
+
+ select hp.JobTitle ,hp.BirthDate,pp.FirstName,pp.LastName ,DATEDIFF(year,hp.BirthDate,GETDATE()) "Age of Employee"
+ from HumanResources.Employee hp
+ join Person.Person pp on hp.BusinessEntityID=pp.BusinessEntityID
+ where DATEDIFF(year,hp.BirthDate,GETDATE()) > 60
+ order by DATEDIFF(year,hp.BirthDate,GETDATE())
+
+
+
+ select ep.Rate,e.JobTitle 
+ from HumanResources.Employee e
+ join HumanResources.EmployeePayHistory ep on ep.BusinessEntityID =e.BusinessEntityID
+ where ep.Rate<(select avg(rate) from HumanResources.EmployeePayHistory )
+
+select ps.Name "Category" ,count(*) "Number of products" 
+from Production.Product pp
+join Production.ProductSubcategory ps on ps.ProductSubcategoryID=pp.ProductSubcategoryID
+group by ps.Name
+having count(*) >20
+order by "Number of products"
+
+
+Create view created as
+select pp.FirstName,pp.LastName 
+from Person.Person pp
+join HumanResources.Employee he on pp.BusinessEntityID=he.BusinessEntityID
+
+
+select pp.FirstName,pp.LastName,Rate ,min(rate) over (partition by ed.name) as [minimum in its department], rate - min(rate) over (partition by ed.name) as difference
+from Person.Person pp
+join HumanResources.EmployeePayHistory ep on pp.BusinessEntityID=ep.BusinessEntityID
+join HumanResources.EmployeeDepartmentHistory de on ep.BusinessEntityID=de.BusinessEntityID
+join HumanResources.Department ed on de.DepartmentID=de.DepartmentID
+order by ed.Name ,rate
+
+
+WITH 
+  cteCandidates (BusinessEntityID)
+  AS
+  (
+    SELECT BusinessEntityID
+    FROM HumanResources.Employee
+    INTERSECT
+    SELECT BusinessEntityID
+    FROM HumanResources.JobCandidate
+  )
+SELECT 
+  c.BusinessEntityID,
+  e.LoginID,
+  e.JobTitle
+FROM 
+  HumanResources.Employee AS e
+  INNER JOIN cteCandidates AS c
+    ON e.BusinessEntityID = c.BusinessEntityID
+ORDER BY
+  c.BusinessEntityID
