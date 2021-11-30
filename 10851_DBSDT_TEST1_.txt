@@ -1,0 +1,82 @@
+use AdventureWorks2012
+
+go
+
+
+// 1)
+select distinct pa.City
+from Person.Address pa
+order by pa.City desc
+
+// 2)
+select* 
+from Sales.SalesPerson  ss
+where ss.Bonus between 2500 and 5000
+order by ss.Bonus 
+//3)
+
+select pp.Name "Product Name",pp.Color "Product Color", pt.Quantity "Product Quantity", pt.TransactionDate "Transaction Date", pt.ActualCost "Actual Cost"
+from Production.TransactionHistory pt
+join Production.Product pp on pp.ProductID=pt.ProductID
+where pt.Quantity between 5 and 8 and pp.name like '%sport%'
+
+//4) task
+
+select SUM (pt.ActualCost) "Total of Actual Cost", pt.ReferenceOrderID,COUNT(*) "Number of history records"
+from Production.TransactionHistory pt
+group by pt.ReferenceOrderID,pt.TransactionDate
+having COUNT(TransactionID) > 60 and pt.TransactionDate> '2013-07-31'
+
+
+
+//5 task
+
+select ss.Name,DATEDIFF (month,sp.ModifiedDate,getdate())"Month since modified date", ss.SalesPersonID,(select avg(SalesLastYear) from Sales.SalesPerson)" Average sales for last year"
+from Sales.SalesPerson sp
+join Sales.Store ss on ss.SalesPersonID=sp.BusinessEntityID
+where sp.SalesLastYear  > 0 and sp.SalesLastYear<(select avg(SalesLastYear) from Sales.SalesPerson)
+order by ss.Name desc
+
+
+// task 6 
+
+create view product_view as
+Select pp.Name as product, pc.Name as model
+from Production.Product pp 
+join production.ProductModelProductDescriptionCulture pm 
+on pp.ProductModelID=pm.ProductModelID
+join Production.Culture pc on pm.CultureID=pc.CultureID
+
+//7 task 
+
+select he.Gender,he.MaritalStatus,pp.FirstName,pp.LastName,hd.StartDate,hdd.GroupName
+from Person.Person pp
+join HumanResources.Employee he on pp.BusinessEntityID =he.BusinessEntityID
+left join HumanResources.JobCandidate hj on he.BusinessEntityID=hj.BusinessEntityID
+join HumanResources.EmployeeDepartmentHistory hd on hd.BusinessEntityID= hj.BusinessEntityID
+join HumanResources.Department hdd on hdd.DepartmentID = hd.DepartmentID
+where hj.JobCandidateID is null and he.HireDate> '2012-01-01'
+
+
+create view view_department_11 as
+select distinct "Name"
+from HumanResources.Department 
+where "name" like 'P%'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
